@@ -51,12 +51,27 @@ brew install python python-tk uv
 
 ### Create & activate venv
 
-```sh
+```bash
 source .env && mkdir -p ~/.venv && python3 -m venv ~/.venv && source ~/.venv/bin/activate
 ```
 
-### Install Python dependencies
+### Viam
 
+```bash
+brew tap viamrobotics/brews && brew install viam-server
+```
+
+Note that when installed via homebrew, the default location for the viam-server config is `/opt/homebrew/etc/viam.json`.
+
+Download the machine cloud credentials `viam-jan-main.json` to your Mac.
+
+Start viam-server on your Mac:
+
+```bash
+viam-server -config ~/GitHub/taatuut/lamavoices/viam-jan-main.json
+```
+
+### Install Python dependencies
 
 ```bash
 python3 -m pip install --upgrade pip

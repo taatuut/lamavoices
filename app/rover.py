@@ -1,51 +1,62 @@
+import asyncio
+import logging
+import os
 from viam.robot.client import RobotClient
 from viam.rpc.dial import DialOptions, Credentials
-from viam.components.base import Base
-import logging, os, asyncio
 
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 
-class RobotClientOptions:
-    """Shim for SDKs missing viam.robot.client.Options."""
-    def __init__(self, dial_options, log_level=logging.INFO, disable_sessions=False):
-        self.dial_options = dial_options
-        self.log_level = log_level
-        self.disable_sessions = disable_sessions
 
 async def connect_viam():
-    """Connect to a Viam rover using API key credentials."""
     robot_address = os.getenv("VIAM_ROBOT_ADDRESS")
-    base_name = os.getenv("VIAM_BASE_NAME", "base")
-    key_id = os.getenv("VIAM_API_KEY_ID")
-    key = os.getenv("VIAM_API_KEY")
+    api_key_id = os.getenv("VIAM_API_KEY_ID")
+    api_key = str(os.getenv("VIAM_API_KEY"))
+    base_name = os.getenv("VIAM_BASE_NAME")
 
-    if not all([robot_address, key_id, key]):
-        raise EnvironmentError("Missing VIAM_ROBOT_ADDRESS, VIAM_API_KEY_ID, or VIAM_API_KEY in .env")
+    creds = Credentials(type="api-key", payload=api_key)
+    dial_options = DialOptions(auth_entity=api_key_id, credentials=creds)
+    opts = RobotClient.Options(dial_options=dial_options)
 
-    creds = Credentials(type="api-key", payload=key)
-    dial_opts = DialOptions(credentials=creds, auth_entity=key_id)
-    opts = RobotClientOptions(dial_opts)  # ✅ replaces missing Options()
+    logger.info(f"🤖 Connecting to Viam Rover at {robot_address}")
 
-    print(f"🤖 Connecting to Viam Rover at {robot_address}")
-    robot = await RobotClient.at_address(robot_address, opts)
-    base = Base.from_robot(robot, base_name)
-    print(f"✅ Connected to rover base '{base_name}'")
-    return robot, base
+    print("creds:", creds, type(creds))
+    print("dial_options:", dial_options, type(dial_options))
+    print("creds attributes:", getattr(creds, "__dict__", None))
 
-async def apply_cmd(base, v, w):
-    """
-    Apply a velocity command to the Viam rover base.
-    v: linear velocity (m/s)
-    w: angular velocity (rad/s)
-    """
     try:
-        # Convert angular velocity to degrees/sec if necessary
-        angular_deg = w * 180.0 / 3.14159
+        robot = await RobotClient.at_address(robot_address, opts)
+        base = await robot.get_component(base_name)
+        logger.info("✅ Successfully connected to the Viam robot.")
+        return robot, base
 
-        if abs(v) < 1e-3 and abs(w) < 1e-3:
-            await base.stop()
-            print("🛑 Rover stopped")
-        else:
-            await base.set_power(linear=v, angular=angular_deg)
-            print(f"🚗 Rover moving — v={v:.2f} m/s, w={w:.2f} rad/s")
+    except ConnectionError:
+        logger.error("❌ ConnectionError: Unable to establish a connection to the machine.", exc_info=False)
+        print(
+            "\n⚠️  ConnectionError: Unable to establish a connection to the machine.\n"
+            "   - Ensure your robot is online in app.viam.com\n"
+            "   - Verify viam-server is running and connected to the cloud.\n"
+        )
+        return None, None
+
     except Exception as e:
-        print(f"⚠️ Failed to apply motion command: {e}")
+        logger.error(f"❌ Unexpected error while connecting to the robot: {e}", exc_info=False)
+        logger.debug("Full traceback:", exc_info=True)
+        print("\n⚠️  Unexpected error while connecting to the robot. Check logs for details.\n")
+        return None, None
+
+
+async def apply_cmd(base, linear_vel, angular_vel):
+    cmd = {"linear": linear_vel, "angular": angular_vel}
+    logger.info(f"Applying command: {cmd}")
+    try:
+        await base.move_straight(linear_vel, angular_vel)
+        logger.info("Command applied successfully.")
+    except Exception as e:
+        logger.error(f"⚠️ Error applying command: {e}", exc_info=False)
+        logger.debug("Full traceback:", exc_info=True)
+        print("\n⚠️  Error while sending command to rover. Check logs for details.\n")
+
+
+if __name__ == "__main__":
+    asyncio.run(connect_viam())
