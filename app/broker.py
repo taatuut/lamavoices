@@ -12,22 +12,55 @@ class MqttBus:
         self.host, self.port = self._parse_host(host)
         self._on_msg_handlers: list[Callable[[str, bytes], None]] = []
 
+        # 🧩 Add log callbacks
+        self.client.on_connect = self._on_connect
+        self.client.on_disconnect = self._on_disconnect
+
     @staticmethod
     def _parse_host(url: str):
-        scheme, rest = url.split("://", 1)
+        if "://" in url:
+            _, rest = url.split("://", 1)
+        else:
+            rest = url
         host, port = rest.split(":")
         return host, int(port)
 
-    def connect(self):
-        self.client.on_message = lambda c, u, m: [h(m.topic, m.payload) for h in self._on_msg_handlers]
-        self.client.connect(self.host, self.port, keepalive=30)
-        self.client.loop_start()
+    def _on_connect(self, client, userdata, flags, rc):
+        print(f"🔗 on_connect called: rc={rc}")
+        if rc == 0:
+            print("✅ Connected successfully to Solace MQTT broker!")
+        else:
+            print(f"❌ Connection failed with code {rc}")
 
-    def publish(self, topic: str, payload: dict, qos: int = 1):
-        self.client.publish(topic, json.dumps(payload).encode("utf-8"), qos=qos)
-
-    def subscribe(self, topic: str):
-        self.client.subscribe(topic, qos=1)
+    def _on_disconnect(self, client, userdata, rc):
+        print(f"⚠️ Disconnected: rc={rc}")
 
     def on_message(self, handler: Callable[[str, bytes], None]):
+        """Register a message handler callback.
+
+        Each handler receives (topic, payload) for every message.
+        """
         self._on_msg_handlers.append(handler)
+
+    def subscribe(self, topic: str, qos: int = 0):
+        """Subscribe to a topic."""
+        print(f"📡 Subscribing to topic: {topic}")
+        self.client.subscribe(topic, qos)
+
+    def publish(self, topic: str, payload: dict, qos: int = 0, retain: bool = False):
+        """Publish a JSON payload to a topic."""
+        import json
+        msg = json.dumps(payload)
+        print(f"📤 Publishing to {topic}: {msg}")
+        self.client.publish(topic, msg, qos=qos, retain=retain)
+
+    def connect(self):
+        self.client.on_message = lambda c, u, m: [h(m.topic, m.payload) for h in self._on_msg_handlers]
+        print(f"🔍 Connecting to host={self.host}, port={self.port}")
+        try:
+            self.client.connect(self.host, self.port, keepalive=30)
+            print("🕐 Waiting for on_connect callback...")
+        except Exception as e:
+            print(f"❌ MQTT connection failed immediately: {e}")
+            raise
+        self.client.loop_start()
