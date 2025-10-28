@@ -57,15 +57,20 @@ source .env && mkdir -p ~/.venv && python3 -m venv ~/.venv && source ~/.venv/bin
 
 ### Viam
 
+Set up the Viam Rover device via https://app.viam.com/ and https://docs.viam.com/operate/reference/prepare/rpi-setup/
+
+Download the machine cloud credentials `viam-jan-main.json` to your repo (included in `.gitignore`).
+
+_Optional_
+
+When no hardware device is available, install `viam-server` on the laptop to create a dummy digital device for testing purposes.
+
 ```bash
 brew tap viamrobotics/brews && brew install viam-server
 ```
-
 Note that when installed via homebrew, the default location for the viam-server config is `/opt/homebrew/etc/viam.json`.
 
-Download the machine cloud credentials `viam-jan-main.json` to your Mac.
-
-Start viam-server on your Mac:
+To start `viam-server` on your Mac:
 
 ```bash
 viam-server -config ~/GitHub/taatuut/lamavoices/viam-jan-main.json
