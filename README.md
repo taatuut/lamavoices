@@ -32,7 +32,7 @@ lamavoices
 └── viam-jan-main.json
 ```
 
-> This doc assumes the above structure.
+> This doc assumes the above structure with local only `.env` and `viam-jan-main.json` files, not part of repository.
 
 ---
 
@@ -106,6 +106,8 @@ Key variables (see `.env`):
 ---
 
 ## Start Sequence (recommended order)
+
+TODO: directly call Python (uvicorn) scripts for steps 1-4
 
 > **TL;DR (scripts):**
 > 1) `./scripts/run_consensus.sh`
