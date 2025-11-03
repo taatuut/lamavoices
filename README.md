@@ -11,25 +11,27 @@ lamavoices
 ├── LICENSE
 ├── README.md
 ├── app
-│   ├── agents.py
-│   ├── broker.py
-│   ├── consensus
-│   ├── intent_cli.py
-│   ├── recorder.py
-│   ├── replay.py
-│   ├── rover.py
-│   ├── runner.py
-│   ├── safety.py
-│   ├── schema.py
-│   ├── webhook.py
-│   └── webui.py
+│   ├── __pycache__
+│   ├── agents.py
+│   ├── broker.py
+│   ├── consensus.py
+│   ├── intent_cli.py
+│   ├── recorder.py
+│   ├── replay.py
+│   ├── rover.py
+│   ├── runner.py
+│   ├── safety.py
+│   ├── schema.py
+│   ├── webhook.py
+│   └── webui.py
 ├── sample.env
-└── scripts
-    ├── run_consensus.sh
-    ├── run_recorder.sh
-    ├── run_rover.sh
-    └── run_webui.sh
+├── scripts
+│   └── run_webui.sh
+├── test_viam_connect.py
+├── tree.txt
+└── viam-jan-main.json
 ```
+
 > This doc assumes the above structure.
 
 ---

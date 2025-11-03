@@ -2,9 +2,19 @@
 ├── LICENSE
 ├── README.md
 ├── app
+│   ├── __pycache__
+│   │   ├── agents.cpython-313.pyc
+│   │   ├── broker.cpython-313.pyc
+│   │   ├── broker.cpython-314.pyc
+│   │   ├── consensus.cpython-313.pyc
+│   │   ├── rover.cpython-313.pyc
+│   │   ├── runner.cpython-313.pyc
+│   │   ├── runner.cpython-314.pyc
+│   │   ├── safety.cpython-313.pyc
+│   │   └── schema.cpython-313.pyc
 │   ├── agents.py
 │   ├── broker.py
-│   ├── consensus
+│   ├── consensus.py
 │   ├── intent_cli.py
 │   ├── recorder.py
 │   ├── replay.py
@@ -16,10 +26,10 @@
 │   └── webui.py
 ├── sample.env
 ├── scripts
-│   ├── run_consensus.sh
 │   ├── run_recorder.sh
-│   ├── run_rover.sh
 │   └── run_webui.sh
-└── tree.txt
+├── test_viam_connect.py
+├── tree.txt
+└── viam-jan-main.json
 
-3 directories, 20 files
+4 directories, 29 files
