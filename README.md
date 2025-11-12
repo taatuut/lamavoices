@@ -110,10 +110,10 @@ Key variables (see `.env`):
 TODO: directly call Python (uvicorn) scripts for steps 1-4
 
 > **TL;DR (scripts):**
-> 1) `./scripts/run_consensus.sh`
-> 2) `./scripts/run_rover.sh` (on the rover‑connected host)
+> 1) `python3 -m app.runner consensus`
+> 2) `python3 -m app.runner rover` (on the rover‑connected host)
 > 3) `./scripts/run_webui.sh` (optional, live dashboard)
-> 4) `./scripts/run_recorder.sh` (optional, DB logging)
+> 4) `python3 -m app.recorder` (optional, DB logging)
 > 5) Run the QR webhook bridge: `uvicorn app.webhook:app --host 0.0.0.0 --port 8345`
 
 You can also invoke the Python modules directly (shown below). Ensure your virtualenv is active and `source .env` has been run.
@@ -150,10 +150,6 @@ uvicorn app.webui:app --host 0.0.0.0 --port 8080
 Persists intents/consensus/events for analytics and replay.
 
 ```bash
-# Script
-./scripts/run_recorder.sh
-
-# Or Python directly
 python3 -m app.recorder
 ```
 
@@ -214,10 +210,7 @@ Make scripts executable once:
 chmod +x scripts/*.sh
 ```
 
-- **Consensus:** `./scripts/run_consensus.sh`
-- **Rover Runner:** `./scripts/run_rover.sh`
 - **Web UI:** `./scripts/run_webui.sh`
-- **Recorder:** `./scripts/run_recorder.sh`
 
 The webhook bridge is run directly via uvicorn (or add your own script if desired).
 
